@@ -1,5 +1,5 @@
 import numpy as np
-import random
+from game_functions import TicTacToe
 
 
 def print_board(game_board):
@@ -34,46 +34,23 @@ def print_board(game_board):
 
 
 def print_sample_board(sample):
-    for item in sample:
-        print(item[0], item[1], '|', item[2], '|', item[3])
+    for digit in sample:
+        print(digit[0], digit[1], '|', digit[2], '|', digit[3])
 
 
-def player_turn():
-    plyr_input = input('Please type a row and a column number separated by a comma.\nType here: ')
-    if plyr_input == 'exit':
-        return 'break'
-    split_input = plyr_input.split(',')
-    clean_input = int(split_input[0]) - 1, int(split_input[1]) - 1
-    return clean_input
+tic_tac_toe = TicTacToe()
 
-
-def computer_turn(game_board):
-    row_num = 0
-    spaces_used = []
-    for row in game_board:
-        col_num = 0
-        for item in row:
-            if item == 1 or item == 2:
-                spaces_used.append((row_num, col_num))
-            col_num += 1
-        row_num += 1
-    print(spaces_used)
-    digit_1 = random.randint(0, 2)
-    digit_2 = random.randint(0, 2)
-    if digit_1 not in spaces_used and digit_2 not in spaces_used:
-        return digit_1, digit_2
-
-
+# Setup
 ttt_sample = np.array([['1:', 1, 2, 3],
                        ['2:', 1, 2, 3],
                        ['3:', 1, 2, 3]])
+
 ttt_setup = np.array([[0, 0, 0],
                       [0, 0, 0],
                       [0, 0, 0]])
 
-print_board(ttt_setup)
-
 single_player = False
+game_over = False
 player_move = True
 current_input = ''
 board = ttt_setup
@@ -85,28 +62,34 @@ if num_players == 'one':
     single_player = True
 
 # Rules of game
+print('\n')
 print_sample_board(ttt_sample)
 print('To play a move type two digits one being the column and row where your digit resides. Use the sample '
-      'board above to check the values. Rows go vertically, whereas the column goes horizontally.')
+      'board above to check the values. Rows go vertically, whereas the column goes horizontally.\n')
+
 print_board(ttt_setup)
-print('Current game ^')
+print('Current game ^\n')
 
 # Play game
-while single_player:
+while single_player and not game_over:
     if player_move:
-        current_input = player_turn()
+        current_input = tic_tac_toe.player_turn(board)
         if current_input == 'break':
             break
         player_move = False
     else:
-        current_input = computer_turn(board)
+        current_input = tic_tac_toe.computer_turn(board)
         player_move = True
     print(current_input)
     if player_move:
         board[current_input[0], current_input[1]] = 1
     else:
         board[current_input[0], current_input[1]] = 2
+    game_over = tic_tac_toe.check_score(board)
     print_board(board)
-
+    if game_over and not player_move:
+        print('\nPlayer wins! Congrats m8.')
+    elif game_over and player_move:
+        print('\nYou lose, disgraceful...')
 
 
