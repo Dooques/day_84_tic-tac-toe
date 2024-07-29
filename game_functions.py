@@ -11,7 +11,7 @@ class TicTacToe:
         for col in range(0, 3):
             for item in range(0, 3):
                 self.col_index[col].append((item, col))
-        self.diag_index = [[(1, 1), (2, 2), (3, 3)], [(3, 1), (2, 2), (1, 3)]]
+        self.diag_index = [[(0, 0), (1, 1), (2, 2)], [(2, 0), (1, 1), (0, 2)]]
 
     def player_turn(self, game_board, game_mode):
         choosing_move = True
@@ -46,12 +46,20 @@ class TicTacToe:
 
     def computer_turn(self, game_board):
         print("\nComputer's Turn")
+        digit_1 = ''
+        digit_2 = ''
         spaces_used = self.spaces_used(game_board)
-        # potential_spots = self.computer_ai(game_board)
-        # print(potential_spots)
-        digit_1 = random.randint(0, 2)
-        digit_2 = random.randint(0, 2)
-        move = (digit_1, digit_2)
+        potential_spots = self.computer_ai(game_board)
+        perception_check = random.randint(0, 20)
+        print(f'Perception result: {perception_check}')
+        if len(potential_spots) == 0 or perception_check < 10:
+            digit_1 = random.randint(0, 2)
+            digit_2 = random.randint(0, 2)
+            move = (digit_1, digit_2)
+        else:
+            print('check successful')
+            print(potential_spots)
+            move = random.choice(potential_spots)
         print(f'computer move: {(digit_1, digit_2)}')
         while move in spaces_used:
             digit_1 = random.randint(0, 2)
@@ -119,58 +127,63 @@ class TicTacToe:
             row_num += 1
         return spaces_used
 
-    # def computer_ai(self, game_board):
-    #     print('checking for potential moves')
-    #     def iterate_lines(lines, line_type):
-    #         potential_move = ''
-    #         moves_to_send = []
-    #         player_moves = []
-    #         line_n = 0
-    #         print(self.row_index)
-    #         print(self.col_index)
-    #         print(self.diag_index)
-    #         for line in lines:
-    #             potential_moves = []
-    #             print(f'{line_type}: {line}')
-    #             space_n = 0
-    #             for space in line:
-    #                 if space == 2:
-    #                     player_moves.append('x')
-    #                 if space == 0:
-    #                     if line_type == 'rows':
-    #                         potential_move = self.row_index[line_n][space_n]
-    #                     elif line_type == 'cols':
-    #                         potential_move = self.col_index[line_n][space_n]
-    #                     else:
-    #                         potential_move = self.diag_index[line_n][space_n]
-    #                     print(f'{line_type}_index = {space_n}')
-    #                     print('potential move:')
-    #                     print(potential_move)
-    #                 space_n += 1
-    #                 potential_moves.append(potential_move)
-    #             if len(player_moves) > 1:
-    #                 moves_to_send.append(potential_moves)
-    #             line_n += 1
-    #         return moves_to_send
-    #
-    #     rows = [game_board[item, :] for item in range(0, 3)]
-    #     cols = [game_board[:, item] for item in range(0, 3)]
-    #     diag_tl_to_br = [game_board[0, 0].item(), game_board[1, 1].item(), game_board[2, 2].item()]
-    #     diag_bl_to_tr = [game_board[2, 0].item(), game_board[1, 1].item(), game_board[0, 2].item()]
-    #     diags = [diag_tl_to_br, diag_bl_to_tr]
-    #     playable_moves = []
-    #
-    #     potential_rows = iterate_lines(rows, 'rows')
-    #     potential_cols = iterate_lines(cols, 'cols')
-    #     potential_diags = iterate_lines(diags, 'diags')
-    #
-    #     for item in potential_rows:
-    #         playable_moves.append(item)
-    #     for item in potential_cols:
-    #         playable_moves.append(item)
-    #     for item in potential_diags:
-    #         playable_moves.append(item)
-    #
-    #     print('playable moves:')
-    #     print(playable_moves)
-    #     return playable_moves
+    def computer_ai(self, game_board):
+        print('checking for potential moves')
+        print(self.row_index)
+        print(self.col_index)
+        print(self.diag_index)
+        def iterate_lines(lines, line_type):
+            moves_to_send = []
+            line_n = 0
+            for line in lines:
+                potential_moves = []
+                player_moves = []
+                print(f'{line_type}: {line}')
+                space_n = 0
+                for space in line:
+                    potential_move = ''
+                    if space == 2:
+                        player_moves.append('x')
+                    if space == 0:
+                        if line_type == 'rows':
+                            potential_move = self.row_index[line_n][space_n]
+                        elif line_type == 'cols':
+                            potential_move = self.col_index[line_n][space_n]
+                        else:
+                            potential_move = self.diag_index[line_n][space_n]
+                        print(f'{line_type}_index = {space_n}')
+                        print('potential move:')
+                        print(potential_move)
+                        potential_moves.append(potential_move)
+                    space_n += 1
+                    print(potential_moves)
+                if len(player_moves) > 1:
+                    for item in potential_moves:
+                        moves_to_send.append(item)
+                line_n += 1
+            return moves_to_send
+
+        rows = [game_board[item, :] for item in range(0, 3)]
+        cols = [game_board[:, item] for item in range(0, 3)]
+        diag_tl_to_br = [game_board[0, 0].item(), game_board[1, 1].item(), game_board[2, 2].item()]
+        diag_bl_to_tr = [game_board[2, 0].item(), game_board[1, 1].item(), game_board[0, 2].item()]
+        diags = [diag_tl_to_br, diag_bl_to_tr]
+        playable_moves = []
+
+        potential_rows = iterate_lines(rows, 'rows')
+        potential_cols = iterate_lines(cols, 'cols')
+        potential_diags = iterate_lines(diags, 'diags')
+
+        for item in potential_rows:
+            playable_moves.append(item)
+        for item in potential_cols:
+            playable_moves.append(item)
+        for item in potential_diags:
+            playable_moves.append(item)
+        print(f'row moves: {potential_rows}')
+        print(f'col moves: {potential_cols}')
+        print(f'diag moves: {potential_diags}')
+
+        print('playable moves:')
+        print(playable_moves)
+        return playable_moves
