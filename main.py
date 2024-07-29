@@ -33,6 +33,12 @@ def print_board(game_board):
         print(row[0], row[1], row[2])
 
 
+def reset_board(game_board):
+    for row in range(0, 3):
+        for n in range(0, 3):
+            game_board[row, n] = 0
+
+
 def print_sample_board(sample):
     for digit in sample:
         print(digit[0], digit[1], '|', digit[2], '|', digit[3])
@@ -45,21 +51,34 @@ ttt_sample = np.array([['1:', 1, 2, 3],
                        ['2:', 1, 2, 3],
                        ['3:', 1, 2, 3]])
 
-ttt_setup = np.array([[0, 0, 0],
-                      [0, 0, 0],
-                      [0, 0, 0]])
+board = np.array([[0, 0, 0],
+                  [0, 0, 0],
+                  [0, 0, 0]])
 
+choosing = True
 single_player = False
 game_over = False
 player_move = True
+mode = ''
 current_input = ''
-board = ttt_setup
 players = ''
+winner = ''
+player_score = 0
+computer_score = 0
+player_1_score = 0
+player_2_score = 0
 
 # Choose # of players
-num_players = input("Type 'one' if you are playing against the computer or 'two' for two player mode: ")
-if num_players == 'one':
-    single_player = True
+while choosing:
+    num_players = input("Type 'one' if you are playing against the computer or 'two' for two player mode: ")
+    if num_players == 'one':
+        single_player = True
+        choosing = False
+    elif num_players == 'two':
+        choosing = False
+        mode = 1
+    else:
+        print("Input not recognised, please type 'one' or 'two' to continue.")
 
 # Rules of game
 print('\n')
@@ -67,13 +86,15 @@ print_sample_board(ttt_sample)
 print('To play a move type two digits one being the column and row where your digit resides. Use the sample '
       'board above to check the values. Rows go vertically, whereas the column goes horizontally.\n')
 
-print_board(ttt_setup)
-print('Current game ^\n')
+print_board(board)
+print('^ Current game ^')
 
-# Play game
-while single_player and not game_over:
+# Single Player Game
+while not game_over and single_player:
+    mode = 'one'
+    # Player Move
     if player_move:
-        current_input = tic_tac_toe.player_turn(board)
+        current_input = tic_tac_toe.player_turn(board, mode)
         if current_input == 'break':
             break
         player_move = False
@@ -81,15 +102,85 @@ while single_player and not game_over:
         current_input = tic_tac_toe.computer_turn(board)
         player_move = True
     print(current_input)
-    if player_move:
+
+    # Play move and change player
+    if mode == 'one' and player_move:
         board[current_input[0], current_input[1]] = 1
     else:
         board[current_input[0], current_input[1]] = 2
-    game_over = tic_tac_toe.check_score(board)
+
+    # Check score
+    end_state = tic_tac_toe.check_score(board)
     print_board(board)
-    if game_over and not player_move:
+    if end_state == 'winner' and not player_move:
         print('\nPlayer wins! Congrats m8.')
-    elif game_over and player_move:
+        winner = 'player'
+        player_score += 1
+    elif end_state == 'winner' and player_move:
         print('\nYou lose, disgraceful...')
+        winner = 'computer'
+        computer_score += 1
+    elif end_state == 'draw':
+        print('\nDraw, no winners this time.')
 
+    # Reset board and play again or end game.
+    if end_state == 'winner' or end_state == 'draw':
+        print('\nRunning Score:')
+        print(f'Player has {player_score} points.')
+        print(f'Computer has {computer_score} points.')
+        play_again = input('Would you like to play again? Y/N: ').lower()
+        if play_again == 'y' or play_again == 'yes':
+            print('Restarting game')
+            reset_board(board)
+            print_board(board)
+            if winner == 'player':
+                player_move = True
+        else:
+            game_over = True
 
+# Two Player Game
+while not game_over and not single_player:
+    # Player Move
+    if player_move:
+        current_input = tic_tac_toe.player_turn(board, mode)
+        if current_input == 'break':
+            break
+
+    # Play Move and change player if two player.
+    if mode == 1:
+        board[current_input[0], current_input[1]] = 1
+        mode = 2
+    elif mode == 2:
+        board[current_input[0], current_input[1]] = 2
+        mode = 1
+
+    # Check score
+    end_state = tic_tac_toe.check_score(board)
+    print('current score:')
+    print_board(board)
+    if end_state == 'winner' and mode == 2:
+        print('\nPlayer 1 wins! Congratulations.')
+        play_again = input('Would you like to play again?')
+        winner = 1
+        player_1_score += 1
+    elif end_state == 'winner' and mode == 1:
+        print('\nPlayer 2 wins! Congratulations.')
+        winner = 2
+        player_2_score += 1
+    elif end_state == 'draw':
+        print('\nDraw, no winners this time.')
+
+    # Reset board and play again or end game.
+    if end_state == 'winner' or end_state == 'draw':
+        print('\nRunning Score:')
+        print(f'Player 1 has {player_1_score} points.')
+        print(f'Player 2 has {player_2_score} points.')
+        play_again = input('Would you like to play again? Y/N: ').lower()
+        if play_again == 'y' or play_again == 'yes':
+            print('Restarting game')
+            reset_board(board)
+            print_board(board)
+            if winner == 1:
+                mode = 1
+        else:
+            game_over = True
