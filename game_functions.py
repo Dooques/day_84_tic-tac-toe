@@ -56,11 +56,11 @@ class TicTacToe:
             digit_1 = random.randint(0, 2)
             digit_2 = random.randint(0, 2)
             move = (digit_1, digit_2)
+            print(f'computer move: {digit_1 + 1, digit_2 + 1}')
         else:
             print('check successful')
-            print(potential_spots)
             move = random.choice(potential_spots)
-        print(f'computer move: {(digit_1, digit_2)}')
+            print(f'computer move: {move[0] + 1, move[1] + 1}')
         while move in spaces_used:
             digit_1 = random.randint(0, 2)
             digit_2 = random.randint(0, 2)
@@ -68,54 +68,42 @@ class TicTacToe:
         else:
             return move
 
-    def check_score(self, game_board):
+    @staticmethod
+    def check_score(game_board):
+        def check_lines(line_type):
+            for r in line_type:
+                if r[1] == r[0]:
+                    if r[2] == r[0]:
+                        if r[0] == 1 or r[0] == 2:
+                            return 'winner'
+
         h_lines_filled = False
-        v_lines_filled = False
-        d_lines_filled = False
+        spaces_filled = []
         rows = [game_board[item, :] for item in range(0, 3)]
         cols = [game_board[:, item] for item in range(0, 3)]
-        diag_tl_to_br = [game_board[0, 0].item(), game_board[1, 1].item(), game_board[2,2].item()]
+        diag_tl_to_br = [game_board[0, 0].item(), game_board[1, 1].item(), game_board[2, 2].item()]
         diag_bl_to_tr = [game_board[2, 0].item(), game_board[1, 1].item(), game_board[0, 2].item()]
         diags = [diag_tl_to_br, diag_bl_to_tr]
-        spaces_filled = []
+
+        if check_lines(rows) == 'winner':
+            return 'winner'
+        if check_lines(cols) == 'winner':
+            return 'winner'
+        if check_lines(diags) == 'winner':
+            return 'winner'
 
         for line in rows:
-            if line[1] == line[0]:
-                if line[2] == line[0]:
-                    if line[0] == 1 or line[0] == 2:
-                        return 'winner'
             for space in line:
                 if space != 0:
                     spaces_filled.append('x')
         if len(spaces_filled) == 9:
             h_lines_filled = True
 
-        for line in cols:
-            if line[1] == line[0]:
-                if line[2] == line[0]:
-                    if line[0] == 1 or line[0] == 2:
-                        return 'winner'
-            for space in line:
-                if space != 0:
-                    spaces_filled.append('x')
-        if len(spaces_filled) == 9:
-            v_lines_filled = True
-
-        for line in diags:
-            if line[1] == line[0]:
-                if line[2] == line[0]:
-                    if line[0] == 1 or line[0] == 2:
-                        return 'winner'
-            for space in line:
-                if space != 0:
-                    spaces_filled.append('x')
-        if len(spaces_filled) == 9:
-            d_lines_filled = True
-
-        if h_lines_filled and v_lines_filled and d_lines_filled:
+        if h_lines_filled:
             return 'draw'
 
-    def spaces_used(self, game_board):
+    @staticmethod
+    def spaces_used(game_board):
         row_num = 0
         spaces_used = []
         for row in game_board:
@@ -128,22 +116,18 @@ class TicTacToe:
         return spaces_used
 
     def computer_ai(self, game_board):
-        print('checking for potential moves')
-        print(self.row_index)
-        print(self.col_index)
-        print(self.diag_index)
         def iterate_lines(lines, line_type):
             moves_to_send = []
             line_n = 0
             for line in lines:
                 potential_moves = []
-                player_moves = []
-                print(f'{line_type}: {line}')
+                spaces_used = []
                 space_n = 0
                 for space in line:
-                    potential_move = ''
                     if space == 2:
-                        player_moves.append('x')
+                        spaces_used.append('x')
+                    elif space == 1:
+                        spaces_used.append('y')
                     if space == 0:
                         if line_type == 'rows':
                             potential_move = self.row_index[line_n][space_n]
@@ -151,15 +135,14 @@ class TicTacToe:
                             potential_move = self.col_index[line_n][space_n]
                         else:
                             potential_move = self.diag_index[line_n][space_n]
-                        print(f'{line_type}_index = {space_n}')
-                        print('potential move:')
-                        print(potential_move)
                         potential_moves.append(potential_move)
                     space_n += 1
-                    print(potential_moves)
-                if len(player_moves) > 1:
-                    for item in potential_moves:
-                        moves_to_send.append(item)
+                if len(spaces_used) > 1:
+                    if 'y' in spaces_used and 'x' in spaces_used:
+                        pass
+                    else:
+                        for item in potential_moves:
+                            moves_to_send.append(item)
                 line_n += 1
             return moves_to_send
 
@@ -180,10 +163,5 @@ class TicTacToe:
             playable_moves.append(item)
         for item in potential_diags:
             playable_moves.append(item)
-        print(f'row moves: {potential_rows}')
-        print(f'col moves: {potential_cols}')
-        print(f'diag moves: {potential_diags}')
 
-        print('playable moves:')
-        print(playable_moves)
         return playable_moves

@@ -1,5 +1,6 @@
 import numpy as np
 from game_functions import TicTacToe
+from ascii_art import logo
 
 
 def print_board(game_board):
@@ -47,9 +48,9 @@ def print_sample_board(sample):
 tic_tac_toe = TicTacToe()
 
 # Setup
-ttt_sample = np.array([['1:', 1, 2, 3],
-                       ['2:', 1, 2, 3],
-                       ['3:', 1, 2, 3]])
+ttt_sample = np.array([['1:     ', 1, 2, 3],
+                       ['2:     ', 1, 2, 3],
+                       ['3:     ', 1, 2, 3]])
 
 board = np.array([[0, 0, 0],
                   [0, 0, 0],
@@ -68,9 +69,13 @@ computer_score = 0
 player_1_score = 0
 player_2_score = 0
 
+print(logo)
+print('Welcome to Noughts and Crosses, the British version of Tic Tac Toe!\n')
+print('The rules are very simple, there will be a 3x3 grid of empty spaces and you will either play')
+print('against the computer or another player. Whoever gets 3 in a row first wins!')
 # Choose # of players
 while choosing:
-    num_players = input("Type 'one' if you are playing against the computer or 'two' for two player mode: ")
+    num_players = input("\nType 'one' if you are playing against the computer or 'two' for two player mode: ")
     if num_players == 'one':
         single_player = True
         choosing = False
@@ -82,8 +87,9 @@ while choosing:
 
 # Rules of game
 print('\n')
+print('Sample board:\nrow     column')
 print_sample_board(ttt_sample)
-print('To play a move type two digits one being the column and row where your digit resides. Use the sample '
+print('To play a move type two digits one being the column and row where your digit resides.\nUse the sample '
       'board above to check the values. Rows go vertically, whereas the column goes horizontally.\n')
 
 print_board(board)
@@ -97,17 +103,16 @@ while not game_over and single_player:
         current_input = tic_tac_toe.player_turn(board, mode)
         if current_input == 'break':
             break
-        player_move = False
     else:
         current_input = tic_tac_toe.computer_turn(board)
-        player_move = True
-    print(current_input)
 
     # Play move and change player
     if mode == 'one' and player_move:
         board[current_input[0], current_input[1]] = 1
+        player_move = False
     else:
         board[current_input[0], current_input[1]] = 2
+        player_move = True
 
     # Check score
     end_state = tic_tac_toe.check_score(board)
@@ -124,7 +129,7 @@ while not game_over and single_player:
         print('\nDraw, no winners this time.')
 
     # Reset board and play again or end game.
-    if end_state == 'winner' or end_state == 'draw':
+    while end_state == 'winner' or end_state == 'draw':
         print('\nRunning Score:')
         print(f'Player has {player_score} points.')
         print(f'Computer has {computer_score} points.')
@@ -133,10 +138,15 @@ while not game_over and single_player:
             print('Restarting game')
             reset_board(board)
             print_board(board)
+            end_state = 'play_again'
             if winner == 'player':
                 player_move = True
-        else:
+        elif play_again == 'n' or play_again == 'no':
+            print('Thanks for playing!')
+            end_state = 'game_over'
             game_over = True
+        else:
+            print('Input not recognised, please try again.')
 
 # Two Player Game
 while not game_over and not single_player:
@@ -171,7 +181,7 @@ while not game_over and not single_player:
         print('\nDraw, no winners this time.')
 
     # Reset board and play again or end game.
-    if end_state == 'winner' or end_state == 'draw':
+    while end_state == 'winner' or end_state == 'draw':
         print('\nRunning Score:')
         print(f'Player 1 has {player_1_score} points.')
         print(f'Player 2 has {player_2_score} points.')
@@ -182,5 +192,8 @@ while not game_over and not single_player:
             print_board(board)
             if winner == 1:
                 mode = 1
-        else:
+        elif play_again == 'n' or play_again == 'no':
+            print('Thanks for playing!')
             game_over = True
+        else:
+            print('Input not recognised, please try again.')
